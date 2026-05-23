@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ImagePanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">security-service</a> &gt; <a href="index.source.html" class="el_package">com.udacity.catpoint.security.application</a> &gt; <span class="el_source">ImagePanel.java</span></div><h1>ImagePanel.java</h1><pre class="source lang-java linenums">package com.udacity.catpoint.security.application;
+
+import com.udacity.catpoint.security.data.AlarmStatus;
+import com.udacity.catpoint.security.service.SecurityService;
+import net.miginfocom.swing.MigLayout;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+
+public class ImagePanel extends JPanel implements StatusListener {
+
+    private final SecurityService securityService;
+    private BufferedImage currentImage;
+    private final JLabel cameraLabel;
+    private final JLabel imageLabel;
+
+    private static final int W = 300, H = 225;
+
+    public ImagePanel(SecurityService securityService) {
+<span class="nc" id="L23">        super(new MigLayout(&quot;fillx, wrap 1&quot;));</span>
+<span class="nc" id="L24">        this.securityService = securityService;</span>
+<span class="nc" id="L25">        securityService.addStatusListener(this);</span>
+
+<span class="nc" id="L27">        cameraLabel = new JLabel(&quot;Camera Feed&quot;);</span>
+<span class="nc" id="L28">        cameraLabel.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 20));</span>
+
+<span class="nc" id="L30">        imageLabel = new JLabel();</span>
+<span class="nc" id="L31">        imageLabel.setPreferredSize(new Dimension(W, H));</span>
+<span class="nc" id="L32">        imageLabel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));</span>
+<span class="nc" id="L33">        imageLabel.setBackground(Color.BLACK);</span>
+<span class="nc" id="L34">        imageLabel.setOpaque(true);</span>
+
+<span class="nc" id="L36">        JButton refreshBtn = new JButton(&quot;Refresh Camera&quot;);</span>
+<span class="nc" id="L37">        refreshBtn.addActionListener(e -&gt; {</span>
+<span class="nc" id="L38">            JFileChooser fc = new JFileChooser();</span>
+<span class="nc" id="L39">            fc.setCurrentDirectory(new File(&quot;.&quot;));</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {</span>
+                try {
+<span class="nc" id="L42">                    currentImage = ImageIO.read(fc.getSelectedFile());</span>
+<span class="nc" id="L43">                    Image scaled = currentImage.getScaledInstance(W, H, Image.SCALE_SMOOTH);</span>
+<span class="nc" id="L44">                    imageLabel.setIcon(new ImageIcon(scaled));</span>
+<span class="nc" id="L45">                } catch (Exception ex) {</span>
+<span class="nc" id="L46">                    JOptionPane.showMessageDialog(this, &quot;Error loading image: &quot; + ex.getMessage());</span>
+<span class="nc" id="L47">                }</span>
+            }
+<span class="nc" id="L49">        });</span>
+
+<span class="nc" id="L51">        JButton scanBtn = new JButton(&quot;Scan Picture&quot;);</span>
+<span class="nc" id="L52">        scanBtn.addActionListener(e -&gt; {</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">            if (currentImage == null) {</span>
+<span class="nc" id="L54">                JOptionPane.showMessageDialog(this, &quot;Please choose an image first.&quot;);</span>
+<span class="nc" id="L55">                return;</span>
+            }
+<span class="nc" id="L57">            securityService.processImage(currentImage);</span>
+<span class="nc" id="L58">        });</span>
+
+<span class="nc" id="L60">        add(cameraLabel);</span>
+<span class="nc" id="L61">        add(imageLabel);</span>
+<span class="nc" id="L62">        add(refreshBtn, &quot;split 2&quot;);</span>
+<span class="nc" id="L63">        add(scanBtn);</span>
+<span class="nc" id="L64">    }</span>
+
+    @Override
+<span class="nc" id="L67">    public void notify(AlarmStatus status) {}</span>
+
+    @Override
+    public void catDetected(Boolean cat) {
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (Boolean.TRUE.equals(cat)) {</span>
+<span class="nc" id="L72">            cameraLabel.setText(&quot;DANGER - CAT DETECTED&quot;);</span>
+<span class="nc" id="L73">            cameraLabel.setForeground(Color.BLACK);</span>
+        } else {
+<span class="nc" id="L75">            cameraLabel.setText(&quot;Camera Feed - No Cats Detected&quot;);</span>
+<span class="nc" id="L76">            cameraLabel.setForeground(Color.BLACK);</span>
+        }
+<span class="nc" id="L78">    }</span>
+
+    @Override
+<span class="nc" id="L81">    public void sensorStatusChanged() {}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

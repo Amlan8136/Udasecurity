@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ControlPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">security-service</a> &gt; <a href="index.source.html" class="el_package">com.udacity.catpoint.security.application</a> &gt; <span class="el_source">ControlPanel.java</span></div><h1>ControlPanel.java</h1><pre class="source lang-java linenums">package com.udacity.catpoint.security.application;
+
+import com.udacity.catpoint.security.data.AlarmStatus;
+import com.udacity.catpoint.security.data.ArmingStatus;
+import com.udacity.catpoint.security.service.SecurityService;
+import net.miginfocom.swing.MigLayout;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.Map;
+
+public class ControlPanel extends JPanel implements StatusListener {
+
+    private final SecurityService securityService;
+    private final Map&lt;ArmingStatus, JButton&gt; buttonMap;
+
+    public ControlPanel(SecurityService securityService) {
+<span class="nc" id="L18">        super(new MigLayout(&quot;fillx, wrap 1&quot;));</span>
+<span class="nc" id="L19">        this.securityService = securityService;</span>
+<span class="nc" id="L20">        securityService.addStatusListener(this);</span>
+
+<span class="nc" id="L22">        JLabel title = new JLabel(&quot;System Control&quot;);</span>
+<span class="nc" id="L23">        title.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 20));</span>
+
+<span class="nc" id="L25">        JButton disarmedBtn  = new JButton(&quot;Disarmed&quot;);</span>
+<span class="nc" id="L26">        JButton armedHomeBtn = new JButton(&quot;Armed - At Home&quot;);</span>
+<span class="nc" id="L27">        JButton armedAwayBtn = new JButton(&quot;Armed - Away&quot;);</span>
+
+<span class="nc" id="L29">        buttonMap = Map.of(</span>
+                ArmingStatus.DISARMED,   disarmedBtn,
+                ArmingStatus.ARMED_HOME, armedHomeBtn,
+                ArmingStatus.ARMED_AWAY, armedAwayBtn
+        );
+
+<span class="nc" id="L35">        disarmedBtn.addActionListener(e  -&gt; setArming(ArmingStatus.DISARMED));</span>
+<span class="nc" id="L36">        armedHomeBtn.addActionListener(e -&gt; setArming(ArmingStatus.ARMED_HOME));</span>
+<span class="nc" id="L37">        armedAwayBtn.addActionListener(e -&gt; setArming(ArmingStatus.ARMED_AWAY));</span>
+
+<span class="nc" id="L39">        add(title);</span>
+<span class="nc" id="L40">        add(disarmedBtn,  &quot;split 3&quot;);</span>
+<span class="nc" id="L41">        add(armedHomeBtn);</span>
+<span class="nc" id="L42">        add(armedAwayBtn, &quot;wrap&quot;);</span>
+
+<span class="nc" id="L44">        highlightCurrent(securityService.getArmingStatus());</span>
+<span class="nc" id="L45">    }</span>
+
+    private void setArming(ArmingStatus status) {
+<span class="nc" id="L48">        securityService.setArmingStatus(status);</span>
+<span class="nc" id="L49">        highlightCurrent(status);</span>
+<span class="nc" id="L50">    }</span>
+
+    private void highlightCurrent(ArmingStatus status) {
+<span class="nc" id="L53">        buttonMap.forEach((s, btn) -&gt;</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">                btn.setBackground(s == status ? new Color(180, 160, 0) : null));</span>
+<span class="nc" id="L55">    }</span>
+
+<span class="nc" id="L57">    @Override public void notify(AlarmStatus status) {}</span>
+<span class="nc" id="L58">    @Override public void catDetected(Boolean cat)   {}</span>
+<span class="nc" id="L59">    @Override public void sensorStatusChanged()      { highlightCurrent(securityService.getArmingStatus()); }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

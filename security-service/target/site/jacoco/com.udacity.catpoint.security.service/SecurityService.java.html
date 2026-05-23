@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">security-service</a> &gt; <a href="index.source.html" class="el_package">com.udacity.catpoint.security.service</a> &gt; <span class="el_source">SecurityService.java</span></div><h1>SecurityService.java</h1><pre class="source lang-java linenums">package com.udacity.catpoint.security.service;
+
+import com.udacity.catpoint.image.service.ImageService;
+import com.udacity.catpoint.security.application.StatusListener;
+import com.udacity.catpoint.security.data.AlarmStatus;
+import com.udacity.catpoint.security.data.ArmingStatus;
+import com.udacity.catpoint.security.data.SecurityRepository;
+import com.udacity.catpoint.security.data.Sensor;
+
+import java.awt.image.BufferedImage;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
+
+public class SecurityService {
+
+    private final ImageService imageService;
+    private final SecurityRepository securityRepository;
+<span class="fc" id="L19">    private final Set&lt;StatusListener&gt; statusListeners = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L20">    private boolean catDetected = false;</span>
+
+<span class="fc" id="L22">    public SecurityService(SecurityRepository securityRepository, ImageService imageService) {</span>
+<span class="fc" id="L23">        this.securityRepository = securityRepository;</span>
+<span class="fc" id="L24">        this.imageService = imageService;</span>
+<span class="fc" id="L25">    }</span>
+
+<span class="fc" id="L27">    public void addStatusListener(StatusListener listener)    { statusListeners.add(listener); }</span>
+<span class="fc" id="L28">    public void removeStatusListener(StatusListener listener) { statusListeners.remove(listener); }</span>
+<span class="nc" id="L29">    public AlarmStatus getAlarmStatus()   { return securityRepository.getAlarmStatus(); }</span>
+<span class="fc" id="L30">    public ArmingStatus getArmingStatus() { return securityRepository.getArmingStatus(); }</span>
+<span class="fc" id="L31">    public Set&lt;Sensor&gt; getSensors()       { return securityRepository.getSensors(); }</span>
+<span class="fc" id="L32">    public void addSensor(Sensor sensor)  { securityRepository.addSensor(sensor); }</span>
+<span class="fc" id="L33">    public void removeSensor(Sensor sensor){ securityRepository.removeSensor(sensor); }</span>
+
+    public void setAlarmStatus(AlarmStatus status) {
+<span class="fc" id="L36">        securityRepository.setAlarmStatus(status);</span>
+<span class="fc" id="L37">        statusListeners.forEach(l -&gt; l.notify(status));</span>
+<span class="fc" id="L38">    }</span>
+
+    public void setArmingStatus(ArmingStatus armingStatus) {
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (armingStatus == ArmingStatus.DISARMED) {</span>
+<span class="fc" id="L42">            setAlarmStatus(AlarmStatus.NO_ALARM);</span>
+        } else {
+<span class="fc" id="L44">            ConcurrentSkipListSet&lt;Sensor&gt; sensors =</span>
+<span class="fc" id="L45">                    new ConcurrentSkipListSet&lt;&gt;(getSensors());</span>
+<span class="fc" id="L46">            sensors.forEach(s -&gt; changeSensorActivationStatus(s, false));</span>
+
+<span class="fc bfc" id="L48" title="All 4 branches covered.">            if (catDetected &amp;&amp; armingStatus == ArmingStatus.ARMED_HOME) {</span>
+<span class="fc" id="L49">                setAlarmStatus(AlarmStatus.ALARM);</span>
+            }
+        }
+<span class="fc" id="L52">        securityRepository.setArmingStatus(armingStatus);</span>
+<span class="fc" id="L53">        statusListeners.forEach(StatusListener::sensorStatusChanged);</span>
+<span class="fc" id="L54">    }</span>
+
+    public void changeSensorActivationStatus(Sensor sensor) {
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (securityRepository.getAlarmStatus() == AlarmStatus.PENDING_ALARM</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">                &amp;&amp; !sensor.getActive()) {</span>
+<span class="fc" id="L59">            handleSensorDeactivated();</span>
+        }
+<span class="fc" id="L61">        securityRepository.updateSensor(sensor);</span>
+<span class="fc" id="L62">    }</span>
+
+    public void changeSensorActivationStatus(Sensor sensor, Boolean active) {
+<span class="fc" id="L65">        AlarmStatus alarm = securityRepository.getAlarmStatus();</span>
+
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (alarm != AlarmStatus.ALARM) {</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">            if (active) {</span>
+<span class="fc" id="L69">                handleSensorActivated();</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">            } else if (sensor.getActive()) {</span>
+<span class="fc" id="L71">                handleSensorDeactivated();</span>
+            }
+        }
+<span class="fc" id="L74">        sensor.setActive(active);</span>
+<span class="fc" id="L75">        securityRepository.updateSensor(sensor);</span>
+<span class="fc" id="L76">    }</span>
+
+    public void processImage(BufferedImage image) {
+<span class="fc" id="L79">        catDetected = imageService.imageContainsCat(image, 50.0f);</span>
+
+<span class="fc bfc" id="L81" title="All 4 branches covered.">        if (catDetected &amp;&amp; getArmingStatus() == ArmingStatus.ARMED_HOME) {</span>
+<span class="fc" id="L82">            setAlarmStatus(AlarmStatus.ALARM);</span>
+<span class="fc bfc" id="L83" title="All 4 branches covered.">        } else if (!catDetected &amp;&amp; allSensorsInactive()) {</span>
+<span class="fc" id="L84">            setAlarmStatus(AlarmStatus.NO_ALARM);</span>
+        }
+<span class="fc" id="L86">        statusListeners.forEach(l -&gt; l.catDetected(catDetected));</span>
+<span class="fc" id="L87">    }</span>
+
+    private void handleSensorActivated() {
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if (securityRepository.getArmingStatus() == ArmingStatus.DISARMED) return;</span>
+<span class="pc bpc" id="L91" title="1 of 3 branches missed.">        switch (securityRepository.getAlarmStatus()) {</span>
+<span class="fc" id="L92">            case NO_ALARM      -&gt; setAlarmStatus(AlarmStatus.PENDING_ALARM);</span>
+<span class="fc" id="L93">            case PENDING_ALARM -&gt; setAlarmStatus(AlarmStatus.ALARM);</span>
+            default            -&gt; { }
+        }
+<span class="fc" id="L96">    }</span>
+
+    private void handleSensorDeactivated() {
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        if (securityRepository.getAlarmStatus() == AlarmStatus.PENDING_ALARM</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">                &amp;&amp; allSensorsInactive()) {</span>
+<span class="fc" id="L101">            setAlarmStatus(AlarmStatus.NO_ALARM);</span>
+        }
+<span class="fc" id="L103">    }</span>
+
+    private boolean allSensorsInactive() {
+<span class="fc" id="L106">        Set&lt;Sensor&gt; sensors = getSensors();</span>
+<span class="fc bfc" id="L107" title="All 4 branches covered.">        return sensors.isEmpty() || sensors.stream().noneMatch(Sensor::getActive);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

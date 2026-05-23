@@ -1,0 +1,3 @@
+com\udacity\catpoint\security\service\FakeSecurityRepository.class
+com\udacity\catpoint\security\service\SecurityServiceIntegrationTest.class
+com\udacity\catpoint\security\service\SecurityServiceTest.class

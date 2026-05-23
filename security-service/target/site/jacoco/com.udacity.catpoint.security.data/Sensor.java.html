@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Sensor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">security-service</a> &gt; <a href="index.source.html" class="el_package">com.udacity.catpoint.security.data</a> &gt; <span class="el_source">Sensor.java</span></div><h1>Sensor.java</h1><pre class="source lang-java linenums">package com.udacity.catpoint.security.data;
+
+import com.google.common.collect.ComparisonChain;
+
+import java.util.Objects;
+import java.util.UUID;
+
+public class Sensor implements Comparable&lt;Sensor&gt; {
+
+    private final UUID sensorId;
+    private String name;
+    private Boolean active;
+    private SensorType sensorType;
+
+<span class="fc" id="L15">    public Sensor(String name, SensorType sensorType) {</span>
+<span class="fc" id="L16">        this.name = name;</span>
+<span class="fc" id="L17">        this.sensorType = sensorType;</span>
+<span class="fc" id="L18">        this.sensorId = UUID.randomUUID();</span>
+<span class="fc" id="L19">        this.active = false;</span>
+<span class="fc" id="L20">    }</span>
+
+<span class="nc" id="L22">    public UUID getSensorId()                     { return sensorId; }</span>
+<span class="fc" id="L23">    public String getName()                       { return name; }</span>
+<span class="nc" id="L24">    public void setName(String name)              { this.name = name; }</span>
+<span class="fc" id="L25">    public Boolean getActive()                    { return active; }</span>
+<span class="fc" id="L26">    public void setActive(Boolean active)         { this.active = active; }</span>
+<span class="nc" id="L27">    public SensorType getSensorType()             { return sensorType; }</span>
+<span class="nc" id="L28">    public void setSensorType(SensorType t)       { this.sensorType = t; }</span>
+
+    @Override
+    public boolean equals(Object o) {
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        if (this == o) return true;</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        if (!(o instanceof Sensor)) return false;</span>
+<span class="nc" id="L34">        return Objects.equals(sensorId, ((Sensor) o).sensorId);</span>
+    }
+
+    @Override
+<span class="fc" id="L38">    public int hashCode() { return Objects.hash(sensorId); }</span>
+
+    @Override
+    public int compareTo(Sensor other) {
+<span class="fc" id="L42">        return ComparisonChain.start()</span>
+<span class="fc" id="L43">                .compare(this.name, other.name)</span>
+<span class="fc" id="L44">                .compare(this.sensorId.toString(), other.sensorId.toString())</span>
+<span class="fc" id="L45">                .result();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

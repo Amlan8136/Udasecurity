@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PretendDatabaseSecurityRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">security-service</a> &gt; <a href="index.source.html" class="el_package">com.udacity.catpoint.security.data</a> &gt; <span class="el_source">PretendDatabaseSecurityRepository.java</span></div><h1>PretendDatabaseSecurityRepository.java</h1><pre class="source lang-java linenums">package com.udacity.catpoint.security.data;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.prefs.Preferences;
+
+<span class="nc" id="L12">public class PretendDatabaseSecurityRepository implements SecurityRepository {</span>
+
+    private static final String SENSORS       = &quot;SENSORS&quot;;
+    private static final String ALARM_STATUS  = &quot;ALARM_STATUS&quot;;
+    private static final String ARMING_STATUS = &quot;ARMING_STATUS&quot;;
+
+<span class="nc" id="L18">    private final Preferences prefs = Preferences.userNodeForPackage(PretendDatabaseSecurityRepository.class);</span>
+<span class="nc" id="L19">    private final Gson gson = new GsonBuilder().create();</span>
+
+    @Override
+    public void addSensor(Sensor sensor) {
+<span class="nc" id="L23">        Set&lt;Sensor&gt; sensors = getSensors();</span>
+<span class="nc" id="L24">        sensors.add(sensor);</span>
+<span class="nc" id="L25">        saveSensors(sensors);</span>
+<span class="nc" id="L26">    }</span>
+
+    @Override
+    public void removeSensor(Sensor sensor) {
+<span class="nc" id="L30">        Set&lt;Sensor&gt; sensors = getSensors();</span>
+<span class="nc" id="L31">        sensors.remove(sensor);</span>
+<span class="nc" id="L32">        saveSensors(sensors);</span>
+<span class="nc" id="L33">    }</span>
+
+    @Override
+    public void updateSensor(Sensor sensor) {
+<span class="nc" id="L37">        Set&lt;Sensor&gt; sensors = getSensors();</span>
+<span class="nc" id="L38">        sensors.remove(sensor);</span>
+<span class="nc" id="L39">        sensors.add(sensor);</span>
+<span class="nc" id="L40">        saveSensors(sensors);</span>
+<span class="nc" id="L41">    }</span>
+
+    private void saveSensors(Set&lt;Sensor&gt; sensors) {
+<span class="nc" id="L44">        prefs.put(SENSORS, gson.toJson(sensors));</span>
+<span class="nc" id="L45">    }</span>
+
+    @Override
+    public Set&lt;Sensor&gt; getSensors() {
+<span class="nc" id="L49">        String json = prefs.get(SENSORS, null);</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (json == null) return new HashSet&lt;&gt;();</span>
+<span class="nc" id="L51">        Type type = new TypeToken&lt;Set&lt;Sensor&gt;&gt;(){}.getType();</span>
+<span class="nc" id="L52">        return gson.fromJson(json, type);</span>
+    }
+
+    @Override
+<span class="nc" id="L56">    public void setAlarmStatus(AlarmStatus status)    { prefs.put(ALARM_STATUS, status.toString()); }</span>
+
+    @Override
+    public AlarmStatus getAlarmStatus() {
+<span class="nc" id="L60">        return AlarmStatus.valueOf(prefs.get(ALARM_STATUS, AlarmStatus.NO_ALARM.toString()));</span>
+    }
+
+    @Override
+<span class="nc" id="L64">    public void setArmingStatus(ArmingStatus status)  { prefs.put(ARMING_STATUS, status.toString()); }</span>
+
+    @Override
+    public ArmingStatus getArmingStatus() {
+<span class="nc" id="L68">        return ArmingStatus.valueOf(prefs.get(ARMING_STATUS, ArmingStatus.DISARMED.toString()));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
